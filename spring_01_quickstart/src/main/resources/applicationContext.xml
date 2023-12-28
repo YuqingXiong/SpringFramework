@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+<!--    id 为 bean 的名字 class 为 bean 对象所属的类-->
+    <bean id="bookDao" class="com.rainsun.Dao.Impl.BookDaoImpl"/>
+    <bean id="bookService" class="com.rainsun.Service.Impl.BookServiceImpl">
+<!--        name 指 BookServiceImpl 中的 bookDao 成员变量
+            ref 指 IoC 容器存放的 bookDao Bean对象 -->
+        <property name="bookDao" ref="bookDao"/>
+    </bean>
+</beans>

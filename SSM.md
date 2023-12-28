@@ -371,8 +371,8 @@ public class AppForInstanceOrder {
 实例工厂实现 FactoryBean 接口，重写接口中的方法：
 
 ```java
-public class OrderDaoFactory implements FactoryBean<OrderDao> {
-    @Override
+public class OrderDaoFactoryBean implements FactoryBean<OrderDao> {
+    @Override // 代替原始工厂中创建对象的方法
     public OrderDao getObject() throws Exception {
         return new OrderDaoImpl();
     }
@@ -386,7 +386,7 @@ public class OrderDaoFactory implements FactoryBean<OrderDao> {
 Spring的bean配置中就可以只写一行配置，指明id和class就行：
 
 ```xml
-<bean id="orderDao" class="com.rainsun.factory.OrderDaoFactory"/>
+<bean id="orderDao" class="com.rainsun.factory.OrderDaoFactoryBean"/>
 ```
 
 继承的 FactoryBean接口中有三个方法：
@@ -406,4 +406,150 @@ default boolean isSingleton() {
 - isSingleton：有默认值，为单例模式。如果重写返回 false 就是非单例的
 
 ## 3.3 Bean 的生命周期
+
+Bean的生命周期是指 bean 对象从创建到销毁的整个过程。
+
+我们主要关注 Bean 的生命周期控制，控制 bean 创建后和销毁前做一些操作。
+
+如何将这些控制操作添加进去呢？
+
+通过在配置文件中指定初始化方法和销毁方法的方式实现
+
+**生命周期设置**
+
+生命周期的控制分为两个阶段：
+
+- bean 创建之后，添加一些操作内容，例如初始化用到的资源
+- bean 销毁之前，添加一些操作内容，例如释放用到的资源
+
+1. 添加初始化方法和销毁方法：
+
+```java
+import com.rainsun.Dao.BookDao;
+
+public class BookDaoImpl implements BookDao {
+    private BookDaoImpl() {
+        System.out.println("book dao constructor is running");
+    }
+    @Override
+    public void save() {
+        System.out.println("Book dao save");
+    }
+    // bean 初始化对应的操作
+    public void init(){
+        System.out.println("init ...");
+    }
+    // bean销毁前的操作
+    public void destroy(){
+        System.out.println("destroy ...");
+    }
+}
+```
+
+2. 配置文件中添加生命周期控制方法
+
+```xml
+ <bean id="bookDao" class="com.rainsun.Dao.Impl.BookDaoImpl" init-method="init" destroy-method="destroy"/>
+```
+
+但是运行程序后，init 方法执行了，但是 destroy 方法是没有被执行的：
+
+<img src="https://xiongyuqing-img.oss-cn-qingdao.aliyuncs.com/img/202312282036237.png" alt="image-20231228203633061" style="zoom:50%;" />
+
+因为 bean 对象是交给 IoC 容器的，JVM退出后，IoC 容器没有被关闭， bean 对象还没还得及销毁，程序已经结束了。
+
+所以我们需要关闭 IoC 容器才能销毁 bean 对象
+
+**close 关闭IoC容器**
+
+- ApplicationContext 接口中没有 close 方法，但是其下一个接口 ClassPathXmlApplicationContext 中有 close 方法
+
+- 改变 IoC 容器的类型，调用 close 方法：
+
+  ```java
+  ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext("applicationContext.xml");
+  ctx.close();
+  ```
+
+**注册钩子关闭IoC容器**
+
+close 关闭容器的方法比较暴力，我们可以提前在容器没关闭前设置一个回调函数，让JVM在退出的时候回调这个函数完成容器的关闭
+
+回调函数的设置（钩子方法）：
+
+```java
+ctx.registerShutdownHook();
+```
+
+上面控制bean生命周期的方式比较繁琐，不仅需要编写对应的控制方法，还需要编写配置文件。
+
+Spring为了简化生命周期的控制，提供了两个接口 `InitializingBean` 和 `DisposableBean` ，重写其中的 `afterProperiesSet` 和 `destroy` 方法：
+
+```java
+package com.rainsun.Service.Impl;
+
+import com.rainsun.Dao.BookDao;
+import com.rainsun.Dao.Impl.BookDaoImpl;
+import com.rainsun.Service.BookService;
+import org.springframework.beans.factory.DisposableBean;
+import org.springframework.beans.factory.InitializingBean;
+
+public class BookServiceImpl implements BookService, InitializingBean, DisposableBean {
+    // 去掉 new 的实现方式，改为 DI（依赖注入）
+//    private BookDao bookDao = new BookDaoImpl();
+    private BookDao bookDao;
+    @Override
+    public void save() {
+        System.out.println("Book service save");
+        bookDao.save();
+    }
+    // 通过调用set方法进行依赖注入
+    public void setBookDao(BookDao bookDao) {
+        this.bookDao = bookDao;
+    }
+
+    @Override // 属性设置之后，也就是属性注入bean对象之后，执行
+    public void afterPropertiesSet() throws Exception {
+        System.out.println("service init");
+    }
+
+    @Override
+    public void destroy() throws Exception {
+        System.out.println("service destroy");
+    }
+}
+```
+
+小结：
+
+1. bean 生命周期控制的方法：
+
+   1. 编写对象创建后和销毁前方法，并在配置文件中为对应bean对象的标签中添加 `init-method` 和 `destroy-method` 属性
+   2. 实现 `InitializingBean` 和 `DisposableBean` 接口，重写其中的 `afterPropertiesSet` 和 `destroy` 方法
+
+2. 生命周期控制在Bean整个生命周期的位置？
+
+   1. 初始化容器
+
+      1. 创建对象（内存分配）
+      2. 执行构造方法
+      3. 执行属性注入（set操作）
+      4. **执行bean的初始化方法**
+
+   2. 使用bean
+
+      执行业务操作
+
+   3. 关闭/销毁容器
+
+      1. 执行 bean的销毁方法
+
+3. 关闭容器的方法：
+
+   调用ConfigurableApplicationContext接口中的方法，它是ApplicationContext接口的子类
+
+   - 调用 close() 方法
+   - 调用回调函数：registerShutdownHook() 方法
+
+
 

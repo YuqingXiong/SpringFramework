@@ -5,8 +5,8 @@ import com.rainsun.factory.OrderDaoFactory;
 
 public class AppForInstanceOrder {
     public static void main(String[] args) {
-        OrderDaoFactory orderDaoFactory = new OrderDaoFactory();
-        OrderDao orderDao = orderDaoFactory.getOrderDao();
-        orderDao.save();
+//        OrderDaoFactory orderDaoFactory = new OrderDaoFactory();
+//        OrderDao orderDao = orderDaoFactory.getOrderDao();
+//        orderDao.save();
     }
 }

@@ -4,12 +4,12 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
 
 <!--    id 为 bean 的名字 class 为 bean 对象所属的类-->
-    <bean id="bookDao" class="com.rainsun.Dao.Impl.BookDaoImpl"/>
+    <bean id="bookDao" class="com.rainsun.Dao.Impl.BookDaoImpl" init-method="init" destroy-method="destroy"/>
     <bean id="bookService" class="com.rainsun.Service.Impl.BookServiceImpl">
 <!--        name 指 BookServiceImpl 中的 bookDao 成员变量
             ref 指 IoC 容器存放的 bookDao Bean对象 -->
         <property name="bookDao" ref="bookDao"/>
     </bean>
-    <bean id="orderDaoFactory" class="com.rainsun.factory.OrderDaoFactory"/>
-    <bean id="orderDao" factory-method="getOrderDao" factory-bean="orderDaoFactory"/>
+<!--    <bean id="orderDaoFactory" class="com.rainsun.factory.OrderDaoFactory"/>-->
+<!--    <bean id="orderDao" factory-method="getOrderDao" factory-bean="orderDaoFactory"/>-->
 </beans>

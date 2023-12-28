@@ -10,4 +10,6 @@
             ref 指 IoC 容器存放的 bookDao Bean对象 -->
         <property name="bookDao" ref="bookDao"/>
     </bean>
+    <bean id="orderDaoFactory" class="com.rainsun.factory.OrderDaoFactory"/>
+    <bean id="orderDao" factory-method="getOrderDao" factory-bean="orderDaoFactory"/>
 </beans>

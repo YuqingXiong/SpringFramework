@@ -62,9 +62,11 @@ Spring 创建的用来存放所创建对象的容器
 
 IoC 容器中存放的一个个对象就是 Bean 或者 Bean 对象
 
-## 2.1 Spring IoC
+## 2.1 Spring IoC & DI
 
 （应该要补充原理的这里）
+
+## 2.2 案例
 
 ### IoC 的入门案例
 
@@ -145,7 +147,7 @@ IoC 容器中存放的一个个对象就是 Bean 或者 Bean 对象
 
 2. 修改 Spring 配置文件，为 bookService 对象添加一个依赖
 
-   把 Ioc 容器中的 bookDao 对象，绑定到 bookService 对象的 bookDao 属性上
+   把 Ioc 容器中的 bookDao 对象，绑定到 bookService 对象的 bookDao 属性上，这个绑定的实现要靠 setter 方法
 
    ```xml
    <?xml version="1.0" encoding="UTF-8"?>
@@ -163,5 +165,245 @@ IoC 容器中存放的一个个对象就是 Bean 或者 Bean 对象
    </beans>
    ```
 
-   
+   ![image-20231228152133121](https://xiongyuqing-img.oss-cn-qingdao.aliyuncs.com/img/202312281521193.png)
+
+# 3 IoC相关 （Bean 的创建）
+
+## 3.1 Bean 配置相关
+
+**基础配置 id, class, name**
+
+```xml
+<bean id="" name="xxx xx xxx" class=""></bean>
+```
+
+- id 表示 Bean 的名字
+- class 是bean的类型，也就是属于哪个实现类的
+- name 是 bean 的别名，可以有多个，用逗号（，）分号（；）空格（ ）进行分隔。通过别名也可以获取 Bean 对象
+
+**作用范围 scope**
+
+```xml
+<bean id="" name="xxx xx xxx" class="" scope="singleton/prototype"></bean>
+```
+
+可选范围：
+
+- singleton：默认为单例模式，获取的同一名字的 bean 对象为同一个对象（地址相同）
+- prototype：非单例
+
+思考：
+
+1. Bean 为什么默认为单例的？
+   - 单例模式下 IoC 容器中只有该类的一个对象
+   - 便于对象的复用，避免了对象的频繁创建和销毁
+2. 哪些 Bean 对象适合交给容器管理？
+   - 表现层对象
+   - 业务层对象
+   - 数据层对象
+   - 工具对象
+   - 它们的对象只创建一次就够了，后面可以反复使用
+3. 哪些 Bean 对象不适合交给容器进行管理？
+   - **封装实例的域对象**（什么意思呢？），记录了一些属性值，状态在不断的变化的对象。
+   - 会引发线程安全问题，所以不适合
+
+## 3.2 Bean 实例化
+
+我们将对象交给 Spring 的 IoC 容器进行创建了，但是容器是如何创建的呢？
+
+**构造方法实例化**
+
+我们为 BookDaoImpl 添加一个 public 的构造方法：
+
+```java
+public class BookDaoImpl implements BookDao {
+    public BookDaoImpl() {
+        System.out.println("book dao constructor is running");
+    }
+    @Override
+    public void save() {
+        System.out.println("Book dao save");
+    }
+}
+```
+
+然后获取 bookDao 对象，调用save 方法，可以发现构造方法被调用了：
+
+```java
+book dao constructor is running
+Book service save
+Book dao save
+```
+
+如果将构造方法改为私有的 private，构造方法依然被调用：
+
+```java
+private BookDaoImpl() {
+    System.out.println("book dao constructor is running");
+}
+```
+
+说明无论构造函数是公开还是私有的，spring底层都能通过构造函数创建出一个bean对象。也就是说Spring底层是利用反射实现的。
+
+如果我们在无参构造函数中添加一个参数，Spring就会报错：没有默认构造函数
+
+进一步说明Spring底层是使用类的无参构造方法
+
+**静态工厂实例化**
+
+首先环境准备：（创建一个工程提供实现类的一个实例）
+
+实现的接口：
+
+```java
+package com.rainsun.Dao;
+public interface OrderDao {
+    public void save();
+}
+```
+
+实现类：
+
+```java
+package com.rainsun.Dao.Impl;
+import com.rainsun.Dao.OrderDao;
+public class OrderDaoImpl implements OrderDao {
+    @Override
+    public void save() {
+        System.out.println("order dao save ...");
+    }
+}
+```
+
+工厂类提供静态方法，返回一个实例
+
+```java
+package com.rainsun.factory;
+import com.rainsun.Dao.Impl.OrderDaoImpl;
+import com.rainsun.Dao.OrderDao;
+public class OrderDaoFactory {
+    public static OrderDao getOrderDao(){
+        return new OrderDaoImpl();
+    }
+}
+```
+
+从工厂中获取对象：
+
+```java
+package com.rainsun;
+import com.rainsun.Dao.OrderDao;
+import com.rainsun.factory.OrderDaoFactory;
+public class AppForInstanceOrder {
+    public static void main(String[] args) {
+        OrderDao orderDao = OrderDaoFactory.getOrderDao();
+        orderDao.save();
+    }
+}
+```
+
+如何将getOrderDao中创建的对象交给Spring管理呢？
+
+这需要用到 Spring 中静态工厂实例化的知识：
+
+在配置文件中添加 工厂方法的全类名(class) 和 工厂方法（factory-method) getOrderDao
+
+```xml
+<bean id="orderDao" class="com.rainsun.factory.OrderDaoFactory" factory-method="getOrderDao" />
+```
+
+![image-20231228162022562](https://xiongyuqing-img.oss-cn-qingdao.aliyuncs.com/img/202312281620627.png)
+
+就可以把 getOrderDao 创建的 orderDao对象加入到容器，我们也可以通过 orderDao的名字获取到对应的bean，然后调用对应的方法了
+
+**实例工厂实例化**
+
+相比与静态工厂，实例工厂需要创建工厂的实例才能创建对象。也就是方法没有了 static 修饰：
+
+```java
+package com.rainsun.factory;
+import com.rainsun.Dao.Impl.OrderDaoImpl;
+import com.rainsun.Dao.OrderDao;
+public class OrderDaoFactory {
+    public OrderDao getOrderDao(){
+        return new OrderDaoImpl();
+    }
+}
+```
+
+获取对象，需要创建工厂实例，再调用方法：
+
+```java
+public class AppForInstanceOrder {
+    public static void main(String[] args) {
+        //创建实例工厂对象
+        OrderDaoFactory orderDaoFactory = new OrderDaoFactory();
+        //创建实例工厂对象
+        OrderDao orderDao = orderDaoFactory.getOrderDao();
+        orderDao.save();
+    }
+}
+```
+
+如何将实例工厂创建的对象交给 Spring 管理呢？
+
+我们也需要创建一个工厂的实例对象，然后用 factoryBean 指向该对象，再指明调用的工厂方法：
+
+```xml
+<bean id="orderDaoFactory" class="com.rainsun.factory.OrderDaoFactory"/>
+    <bean id="orderDao" factory-method="getOrderDao" factory-bean="orderDaoFactory"/>
+```
+
+- 首先实例化工厂对象
+
+- 调用对象中的方法创建bean
+
+  - factory-bean：工厂的实例对象
+
+  - factory-method：工厂中具体创建对象的方法名称
+
+    ![image-20231228163103914](https://xiongyuqing-img.oss-cn-qingdao.aliyuncs.com/img/202312281631961.png)
+
+**FactoryBean的使用**
+
+实际上创建的工厂 bean 只是为了配合后面创建对象bean的使用，且每次创建对象bean的时候都需要指定 工厂bean对象。比较麻烦，Spring 提供了一个 FactoryBean接口的方式简化开发：
+
+实例工厂实现 FactoryBean 接口，重写接口中的方法：
+
+```java
+public class OrderDaoFactory implements FactoryBean<OrderDao> {
+    @Override
+    public OrderDao getObject() throws Exception {
+        return new OrderDaoImpl();
+    }
+    @Override
+    public Class<?> getObjectType() {
+        return OrderDao.class;
+    }
+}
+```
+
+Spring的bean配置中就可以只写一行配置，指明id和class就行：
+
+```xml
+<bean id="orderDao" class="com.rainsun.factory.OrderDaoFactory"/>
+```
+
+继承的 FactoryBean接口中有三个方法：
+
+```java
+T getObject() throws Exception;
+
+Class<?> getObjectType();
+
+default boolean isSingleton() {
+		return true;
+}
+```
+
+- getObject ：重写返回创建的对象
+- getObjectType：重写返回被创建对象的Class对象
+- isSingleton：有默认值，为单例模式。如果重写返回 false 就是非单例的
+
+## 3.3 Bean 的生命周期
 

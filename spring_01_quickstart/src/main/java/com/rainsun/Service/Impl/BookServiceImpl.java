@@ -6,7 +6,7 @@ import com.rainsun.Service.BookService;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 
-public class BookServiceImpl implements BookService, InitializingBean, DisposableBean {
+public class BookServiceImpl implements BookService{
     private BookDao bookDao;
 
     public void setBookDao(BookDao bookDao) {
@@ -17,14 +17,5 @@ public class BookServiceImpl implements BookService, InitializingBean, Disposabl
     public void save() {
         System.out.println("Book service save");
         bookDao.save();
-    }
-    @Override
-    public void afterPropertiesSet() throws Exception {
-        System.out.println("service init");
-    }
-
-    @Override
-    public void destroy() throws Exception {
-        System.out.println("service destroy");
     }
 }

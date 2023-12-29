@@ -2,32 +2,43 @@ package com.rainsun.Dao.Impl;
 
 import com.rainsun.Dao.BookDao;
 
+import java.util.*;
+
 public class BookDaoImpl implements BookDao{
-    private String databaseName;
-    private int connectionNum;
+    private int[] myArray;
+    private List<String> myList;
+    private Set<String> mySet;
+    private Map<String, String> myMap;
+    private Properties myProperties;
 
-    public void setDatabaseName(String databaseName) {
-        this.databaseName = databaseName;
+    public void setMyArray(int[] myArray) {
+        this.myArray = myArray;
     }
 
-    public void setConnectionNum(int connectionNum) {
-        this.connectionNum = connectionNum;
+    public void setMyList(List<String> myList) {
+        this.myList = myList;
     }
 
-    private BookDaoImpl() {
-//        System.out.println("book dao constructor is running");
+    public void setMySet(Set<String> mySet) {
+        this.mySet = mySet;
     }
+
+    public void setMyMap(Map<String, String> myMap) {
+        this.myMap = myMap;
+    }
+
+    public void setMyProperties(Properties myProperties) {
+        this.myProperties = myProperties;
+    }
+
     @Override
     public void save() {
-        System.out.println("Book dao save" + databaseName + ", " + connectionNum);
-    }
+        System.out.println("Book dao save");
 
-    // bean 初始化对应的操作
-    public void init(){
-        System.out.println("init ...");
-    }
-    // bean销毁前的操作
-    public void destroy(){
-        System.out.println("destroy ...");
+        System.out.println("遍历数组：" + Arrays.toString(myArray));
+        System.out.println("遍历List: " + myList);
+        System.out.println("遍历set: " + mySet);
+        System.out.println("遍历map: " + myMap);
+        System.out.println("遍历properties: " + myProperties);
     }
 }

@@ -2,11 +2,43 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
-
-<!--    id 为 bean 的名字 class 为 bean 对象所属的类-->
-    <bean id="bookDao" class="com.rainsun.Dao.Impl.BookDaoImpl" init-method="init" destroy-method="destroy">
-        <property name="databaseName" value="mysql"/>
-        <property name="connectionNum" value="10"/>
+    <bean id="bookDao" class="com.rainsun.Dao.Impl.BookDaoImpl">
+        <property name="myArray">
+            <array>
+                <value>100</value>
+                <value>200</value>
+                <value>300</value>
+            </array>
+        </property>
+        <property name="myList">
+            <list>
+                <value>rainsun</value>
+                <value>xiongyuqing</value>
+                <value>sdu</value>
+            </list>
+        </property>
+        <property name="mySet">
+            <set>
+                <value>rainsun</value>
+                <value>xiongyuqing</value>
+                <value>sdu</value>
+            </set>
+        </property>
+        <property name="myMap">
+            <map>
+                <entry key="name" value="xyq"/>
+                <entry key="age" value="23"/>
+                <entry key="city" value="qingdao"/>
+            </map>
+        </property>
+        <property name="myProperties">
+            <props>
+                <prop key="name">xyq</prop>
+                <prop key="age">23</prop>
+                <prop key="city">qingdao</prop>
+            </props>
+        </property>
     </bean>
+
     <bean id="bookService" class="com.rainsun.Service.Impl.BookServiceImpl" autowire="byType"/>
 </beans>

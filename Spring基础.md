@@ -723,5 +723,121 @@ public class BookServiceImpl implements BookService, InitializingBean, Disposabl
 - byName必须保证容器中存在该名称的bean，否则注入为 null，这里存在耦合
 - 自动装配的优先级低于setter注入和构造器注入，同时出现时自动装配会失效
 
+## 4.4 集合注入
 
+需要注入的数据类型：
+
+```java
+public class BookDaoImpl implements BookDao{
+    private int[] myArray;
+    private List<String> myList;
+    private Set<String> mySet;
+    private Map<String, String> myMap;
+    private Properties myProperties;
+
+    public void setMyArray(int[] myArray) {
+        this.myArray = myArray;
+    }
+
+    public void setMyList(List<String> myList) {
+        this.myList = myList;
+    }
+
+    public void setMySet(Set<String> mySet) {
+        this.mySet = mySet;
+    }
+
+    public void setMyMap(Map<String, String> myMap) {
+        this.myMap = myMap;
+    }
+
+    public void setMyProperties(Properties myProperties) {
+        this.myProperties = myProperties;
+    }
+
+    @Override
+    public void save() {
+        System.out.println("Book dao save");
+
+        System.out.println("遍历数组：" + Arrays.toString(myArray));
+        System.out.println("遍历List: " + myList);
+        System.out.println("遍历set: " + mySet);
+        System.out.println("遍历map: " + myMap);
+        System.out.println("遍历properties: " + myProperties);
+    }
+}
+```
+
+配置文件编写：
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+    <bean id="bookDao" class="com.rainsun.Dao.Impl.BookDaoImpl">
+        <property name="myArray">
+            <array>
+                <value>100</value>
+                <value>200</value>
+                <value>300</value>
+            </array>
+        </property>
+        <property name="myList">
+            <list>
+                <value>rainsun</value>
+                <value>xiongyuqing</value>
+                <value>sdu</value>
+            </list>
+        </property>
+        <property name="mySet">
+            <set>
+                <value>rainsun</value>
+                <value>xiongyuqing</value>
+                <value>sdu</value>
+            </set>
+        </property>
+        <property name="myMap">
+            <map>
+                <entry key="name" value="xyq"/>
+                <entry key="age" value="23"/>
+                <entry key="city" value="qingdao"/>
+            </map>
+        </property>
+        <property name="myProperties">
+            <props>
+                <prop key="name">xyq</prop>
+                <prop key="age">23</prop>
+                <prop key="city">qingdao</prop>
+            </props>
+        </property>
+    </bean>
+
+    <bean id="bookService" class="com.rainsun.Service.Impl.BookServiceImpl" autowire="byType"/>
+</beans>
+```
+
+运行：
+
+```java
+public class App2 {
+    public static void main(String[] args) {
+        ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext("applicationContext.xml");
+        BookDao bookDao = (BookDao)ctx.getBean("bookDao");
+        bookDao.save();
+    }
+}
+```
+
+```java
+Book dao save
+遍历数组：[100, 200, 300]
+遍历List: [rainsun, xiongyuqing, sdu]
+遍历set: [rainsun, xiongyuqing, sdu]
+遍历map: {name=xyq, age=23, city=qingdao}
+遍历properties: {city=qingdao, name=xyq, age=23}
+```
+
+* List的底层也是通过数组实现的，所以`<list>`和`<array>`标签是可以混用
+* 集合中要添加引用类型，只需要把`<value>`标签改成`<ref>`标签，这种方式用的比较少
 

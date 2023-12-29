@@ -8,9 +8,5 @@
         <property name="databaseName" value="mysql"/>
         <property name="connectionNum" value="10"/>
     </bean>
-    <bean id="bookService" class="com.rainsun.Service.Impl.BookServiceImpl">
-        <constructor-arg name="bookDao" ref="bookDao"/>
-    </bean>
-<!--    <bean id="orderDaoFactory" class="com.rainsun.factory.OrderDaoFactory"/>-->
-<!--    <bean id="orderDao" factory-method="getOrderDao" factory-bean="orderDaoFactory"/>-->
+    <bean id="bookService" class="com.rainsun.Service.Impl.BookServiceImpl" autowire="byType"/>
 </beans>

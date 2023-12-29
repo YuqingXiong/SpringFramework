@@ -635,6 +635,93 @@ public class BookServiceImpl implements BookService, InitializingBean, Disposabl
 同样的定义简单类型属性，提供构造方法，不同的是这里用 value 属性注入数据
 
 ```xml
+<constructor-arg name="databaseName" value="mysql"/>
 <constructor-arg name="connectionNum" value="10"/>
 ```
+
+3. **构造器注入多个数据的耦合问题**
+
+对应关系耦合：构造函数形参与 标签中的 name 属性对应
+
+![image-20231229102157908](https://xiongyuqing-img.oss-cn-qingdao.aliyuncs.com/img/202312291022993.png)
+
+解决耦合的方法：
+
+- 方式一：按照类型注入，使用 type 属性指明类型：
+
+  ```xml
+  <constructor-arg type="java.lang.String" value="mysql"/>
+  <constructor-arg type="int" value="10"/>
+  ```
+
+  如果存在类型相同的参数，这种注入方法就存在问题
+
+- 方式二：按照索引下标注入，下标从0开始：
+
+  ```xml
+  <constructor-arg index="0" value="mysql"/>
+  <constructor-arg index="1" value="10"/>
+  ```
+
+  解决了参数类型重复的问题，但是如果参数顺序发生了变化，就带来了新的耦合问题
+
+4. **依赖注入的方式选择**
+
+- 强制依赖使用构造器进行注入。强制依赖是指对象创建过程中必须注入的依赖参数对象，而setter注入可能会导致注入null对象
+- 可选依赖使用setter注入。可选依赖指对象创建过程中注入的依赖参数对象可有可无
+- Spring提倡使用构造器，第三方框架大多使用构造器注入，相对严谨
+- 我们自己开发用 setter 注入比较简单
+
+## 4.3 自动配置
+
+上面配置bean依赖的过程很繁琐，需要编写配置文件，Spring提供了自动配置的方式。
+
+**依赖自动装配：**  IoC 容器根据 bean 所依赖的资源自动在容器中自动查找并注入到bean的过程称为自动装配
+
+**自动装配的方式：**
+
+- **按类型注入** ：byType
+- 按名称 ：byName
+- 按构造方法
+- 不启用自动装配
+
+![image-20231229104747657](https://xiongyuqing-img.oss-cn-qingdao.aliyuncs.com/img/202312291047736.png)
+
+**实现方式：**
+
+- 类中定义属性
+
+- 编写set方法
+
+- bean标签中添加autowire属性，填写自动注入的方式
+
+  ```java
+  public class BookServiceImpl implements BookService {
+      private BookDao bookDao;
+  
+      public void setBookDao(BookDao bookDao) {
+          this.bookDao = bookDao;
+      }
+  }
+  ```
+
+  ```xml
+  <bean id="bookService" class="com.rainsun.Service.Impl.BookServiceImpl" autowire="byType"/>
+  ```
+
+注意：
+
+- 注入属性对应的 setter 方法不能省略
+- 该属性对应的 bean 对象必须存在在 IoC 容器中被管理
+- 如果存在同一类型bean对象，则会报错：`NoUniqueBeanDefinitionException`
+- 此时可以按照名称注入，使用属性 `byName`，该名称是指setter方法去掉set并小写首字母的属性名
+
+自动装配的特征：
+
+- 自动装配只能用于引用类型，不能用于简单类型
+- byType 需要保证容器中同类型的bean唯一
+- byName必须保证容器中存在该名称的bean，否则注入为 null，这里存在耦合
+- 自动装配的优先级低于setter注入和构造器注入，同时出现时自动装配会失效
+
+
 

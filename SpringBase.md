@@ -841,3 +841,182 @@ Book dao save
 * List的底层也是通过数组实现的，所以`<list>`和`<array>`标签是可以混用
 * 集合中要添加引用类型，只需要把`<value>`标签改成`<ref>`标签，这种方式用的比较少
 
+# 5 IoC&DI 配置管理第三方 Bean
+
+## 5.1 数据源对象管理
+
+实现 Druid 对象的管理：
+
+1. 连接数据库，创建一个数据库 spring_db
+
+   ![image-20231229152914301](https://xiongyuqing-img.oss-cn-qingdao.aliyuncs.com/img/202312291529413.png)
+
+2. pom 文件导入 Druid 的依赖：
+
+   ```xml
+   <dependency>
+       <groupId>com.alibaba</groupId>
+       <artifactId>druid</artifactId>
+       <version>1.2.15</version>
+   </dependency>
+   <dependency>
+       <groupId>org.springframework</groupId>
+       <artifactId>spring-context</artifactId>
+       <version>6.1.1</version>
+   </dependency>
+   ```
+
+3. 在 applicationContext.xml 文件中添加 DruidDataSource 的配置，配置第三方 Bean
+
+   ```xml
+   <?xml version="1.0" encoding="UTF-8"?>
+   <beans xmlns="http://www.springframework.org/schema/beans"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+   <!--    管理DruidDataSource对象-->
+   <bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource">
+       <!--  数据库驱动设置：-->
+       <property name="driverClassName" value="com.mysql.jdbc.Driver"/>
+       <!--  数据库连接地址：-->
+       <property name="url" value="jdbc:mysql://localhost:3306/spring_db"/>
+       <!--  数据库连接用户名：-->
+       <property name="username" value="root"/>
+       <!--  数据库连接密码：-->
+       <property name="password" value="1234"/>
+   </bean>
+   </beans>
+   ```
+
+4. 从容器中获取对应的 bean 对象：
+
+   ```java
+   public class App 
+   {
+       public static void main( String[] args ) {
+           ApplicationContext ctx = new ClassPathXmlApplicationContext("applicationContext.xml");
+           DataSource dataSource = (DataSource) ctx.getBean("dataSource");
+           System.out.println(dataSource);
+       }
+   }
+   ```
+
+Druid 封装了 com.mysql.jdbc.Driver 驱动，其他数据源可能没封装需要在pom中导入
+
+## 5.2 加载 properties 配置文件
+
+数据库连接的哪些地址，密码写在Spring配置文件中的，不利于后期维护。需要把这些配置信息单独提取出来到 properties 文件中，然后从 properties 配置文件中读取属性值来配置bean
+
+1. 在resources 目录下准备一个保存了配置信息的 jdbc.properties文件：
+
+   ```properties
+   jdbc.driver=com.mysql.jdbc.Driver
+   jdbc.url=jdbc:mysql://127.0.0.1:3306/spring_db
+   jdbc.username=root
+   jdbc.password=1234
+   ```
+
+2. 开启 context 命名空间：
+
+   ```
+   xmlns:context="http://www.springframework.org/schema/context"
+   xsi:schemaLocation="http://www.springframework.org/schema/context
+   http://www.springframework.org/schema/context/spring-context.xsd“
+   ```
+
+   ```xml
+   <?xml version="1.0" encoding="UTF-8"?>
+   <beans xmlns="http://www.springframework.org/schema/beans"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xmlns:context="http://www.springframework.org/schema/context"
+          xsi:schemaLocation="
+          http://www.springframework.org/schema/beans
+          http://www.springframework.org/schema/beans/spring-beans.xsd
+          http://www.springframework.org/schema/context
+          http://www.springframework.org/schema/context/spring-context.xsd">
+   ```
+
+3. 使用`context`命名空间下的 `property-placeholder` 标签来加载properties配置文件
+
+   ```xml
+   <context:property-placeholder location="jdbc.properties"/>
+   ```
+
+4. 使用 `${key}` 读取对应属性的内容完成属性注入
+
+   ```xml
+   <?xml version="1.0" encoding="UTF-8"?>
+   <beans xmlns="http://www.springframework.org/schema/beans"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xmlns:context="http://www.springframework.org/schema/context"
+          xsi:schemaLocation="
+          http://www.springframework.org/schema/beans
+          http://www.springframework.org/schema/beans/spring-beans.xsd
+          http://www.springframework.org/schema/context
+          http://www.springframework.org/schema/context/spring-context.xsd">
+   
+       <context:property-placeholder location="jdbc.properties"/>
+       <bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource">
+           <property name="driverClassName" value="${jdbc.driver}"/>
+           <property name="url" value="${jdbc.url}"/>
+           <property name="username" value="${jdbc.username}"/>
+           <property name="password" value="${jdbc.password}"/>
+       </bean>
+   </beans>
+   ```
+
+# 6 核心容器
+
+## 6.1 容器创建
+
+1. 根据 类路径下的 XML 配置文件创建容器 ApplicationContext：
+
+   ```java
+   ApplicationContext ctx = new ClassPathXmlApplicationContext("applicationContext.xml");
+   ```
+
+2. 根据 文件系统下的XML配置文件创建 ApplicationContext：
+
+   ```java
+   ApplicationContext ctx = new FileSystemXmlApplicationContext("D:\\CodeProject\\Java\\SpringFramework\\spring_01_base\\src\\main\\resources\\applicationContext.xml");
+   ```
+
+   这样耦合度较高
+
+## 6.2 获取Bean的方式
+
+1. 根据 id 或者 name 直接获取，但是需要进行类型转换：
+
+   ```java
+   BookDao bookDao = (BookDao) ctx.getBean("bookDao");
+   ```
+
+2. 传入bean的名字的同时，传入bean的类型
+
+   ```java
+   BookDao bookDao = ctx.getBean("bookDao", BookDao.class);
+   ```
+
+3. 直接传入 bean 的类型。类似依赖注入的类型注入
+
+   ```java
+   BookDao bookDao = ctx.getBean(BookDao.class);
+   ```
+
+## 6.3 容器类的层次结构
+
+![image-20231229200149710](https://xiongyuqing-img.oss-cn-qingdao.aliyuncs.com/img/202312292001790.png)
+
+可以看出容器的顶层接口是BeanFactory，它的常用实现类是 FileSystem/ClassPath XmlApplicationContext
+
+* BeanFactory是延迟加载，只有在获取bean对象的时候才会去创建
+
+* ApplicationContext是立即加载，容器加载的时候就会创建bean对象
+
+* ApplicationContext要想成为延迟加载，需要给对应的 bean 添加属性：`lazy-init="true"`：
+
+  ```xml
+   <bean id="bookDao" class="com.rainsun.dao.impl.BookDaoImpl"  lazy-init="true"/>
+  ```
+
+
+

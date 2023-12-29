@@ -10,7 +10,8 @@
   <name>SpringFramework</name>
   <url>http://maven.apache.org</url>
   <modules>
-    <module>spring_01_quickstart</module>
+    <module>spring_01_base</module>
+      <module>spring_02_datasource</module>
   </modules>
 
   <properties>

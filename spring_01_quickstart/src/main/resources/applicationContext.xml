@@ -4,7 +4,10 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
 
 <!--    id 为 bean 的名字 class 为 bean 对象所属的类-->
-    <bean id="bookDao" class="com.rainsun.Dao.Impl.BookDaoImpl" init-method="init" destroy-method="destroy"/>
+    <bean id="bookDao" class="com.rainsun.Dao.Impl.BookDaoImpl" init-method="init" destroy-method="destroy">
+        <property name="databaseName" value="mysql"/>
+        <property name="connectionNum" value="10"/>
+    </bean>
     <bean id="bookService" class="com.rainsun.Service.Impl.BookServiceImpl">
 <!--        name 指 BookServiceImpl 中的 bookDao 成员变量
             ref 指 IoC 容器存放的 bookDao Bean对象 -->

@@ -551,5 +551,19 @@ public class BookServiceImpl implements BookService, InitializingBean, Disposabl
    - 调用 close() 方法
    - 调用回调函数：registerShutdownHook() 方法
 
+# 4 DI 相关
 
+依赖注入描述了容器中建立bean与bean之间的依赖关系的过程，bean的运行需要的数据类型有两类：引用类型，简单类型（基本数据类型与String）
+
+向类中传递数据有两种方法：普通方法（set方法），构造方法
+
+所以我们可以使用 setter 或者构造器完成简单类型和引用类型的bean注入
+
+## 4.1 setter 注入
+
+1. setter 注入引用类型：
+
+- 在类中定义引用类型属性，提供可访问的set方法，在 property 标签的 ref 属性中引用该引用类型的 bean
+
+2. setter 注入简单类型
 

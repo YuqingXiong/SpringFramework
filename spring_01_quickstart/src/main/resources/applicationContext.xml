@@ -9,9 +9,7 @@
         <property name="connectionNum" value="10"/>
     </bean>
     <bean id="bookService" class="com.rainsun.Service.Impl.BookServiceImpl">
-<!--        name 指 BookServiceImpl 中的 bookDao 成员变量
-            ref 指 IoC 容器存放的 bookDao Bean对象 -->
-        <property name="bookDao" ref="bookDao"/>
+        <constructor-arg name="bookDao" ref="bookDao"/>
     </bean>
 <!--    <bean id="orderDaoFactory" class="com.rainsun.factory.OrderDaoFactory"/>-->
 <!--    <bean id="orderDao" factory-method="getOrderDao" factory-bean="orderDaoFactory"/>-->

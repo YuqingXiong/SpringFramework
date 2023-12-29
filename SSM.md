@@ -561,9 +561,80 @@ public class BookServiceImpl implements BookService, InitializingBean, Disposabl
 
 ## 4.1 setter 注入
 
-1. setter 注入引用类型：
+1. **setter 注入引用类型：**
 
-- 在类中定义引用类型属性，提供可访问的set方法，在 property 标签的 ref 属性中引用该引用类型的 bean
+- 在类中定义引用类型属性
 
-2. setter 注入简单类型
+- 提供可访问的set方法
+
+- 在 property 标签的 ref 属性中引用该引用类型的 bean
+
+  ```xml
+  <property name="" ref=""/>
+  ```
+
+2. **setter 注入简单类型**
+
+- 在类中定义简单类型属性
+
+- 提供可访问的set方法
+
+- 在 property 标签的 value 属性中注入具体的值
+
+  ```java
+  public class BookDaoImpl implements BookDao{
+      private String databaseName;
+      private int connectionNum;
+      
+      public void setDatabaseName(String databaseName) {
+          this.databaseName = databaseName;
+      }
+  
+      public void setConnectionNum(int connectionNum) {
+          this.connectionNum = connectionNum;
+      }
+  }
+  ```
+
+  Spring 在注入时会自动转换为对应的参数类型
+
+  ```xml
+  <bean id="bookDao" class="com.rainsun.Dao.Impl.BookDaoImpl" init-method="init" destroy-method="destroy">
+      <property name="databaseName" value="mysql"/>
+      <property name="connectionNum" value="10"/>
+  </bean>
+  ```
+
+## 4.2 构造器注入
+
+1. **构造器注入引用类型：**
+
+- 在类中定义引用类型属性
+
+- 提供构造方法
+
+- 在 constructor-arg 标签的 ref 标签引用注入的 bean
+
+  ```java
+  public class BookServiceImpl implements BookService {
+      private BookDao bookDao; // 1
+      public BookServiceImpl(BookDao bookDao) { // 2
+          this.bookDao = bookDao;
+      }
+  }
+  ```
+
+  ```xml
+  <bean id="bookService" class="com.rainsun.Service.Impl.BookServiceImpl">
+      <constructor-arg name="bookDao" ref="bookDao"/>
+  </bean>
+  ```
+
+2. **构造器注入简单类型**
+
+同样的定义简单类型属性，提供构造方法，不同的是这里用 value 属性注入数据
+
+```xml
+<constructor-arg name="connectionNum" value="10"/>
+```
 

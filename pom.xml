@@ -13,6 +13,8 @@
     <module>spring_01_base</module>
       <module>spring_02_datasource</module>
       <module>spring_03_annotation</module>
+      <module>spring_04_mybatis</module>
+      <module>spring_05_junit</module>
   </modules>
 
   <properties>

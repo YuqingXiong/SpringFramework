@@ -343,3 +343,98 @@ public class JdbcConfig {
    ```
 
    ==引用类型注入只需要为bean定义方法设置形参即可，容器会根据类型自动装配对象。==
+
+# 2 Spring 整合第三方工具
+
+## 2.1 Spring 整合 Mybatis
+
+1. 导入需要整合的 jar 包
+
+   ```xml
+   <dependency>
+       <groupId>org.springframework</groupId>
+       <artifactId>spring-jdbc</artifactId>
+       <version>6.1.1</version>
+   </dependency>
+   <dependency>
+       <groupId>org.mybatis</groupId>
+       <artifactId>mybatis-spring</artifactId>
+       <version>3.0.3</version>
+   </dependency>
+   ```
+
+2. 使用 `@Configuration` 注解创建 Spring 配置类管理 Bean 
+
+   - `@ComponentScan` 设置bean的包扫描范围
+   - `@PropertySource` 设置 properties 文件名，导入配置信息
+
+   ```java
+   @Configuration
+   @ComponentScan("com.rainsun")
+   public class SpringConfig {
+   }
+   ```
+
+3. 创建数据源配置类
+
+   ```java
+   public class JdbcConfig {
+       @Value("${jdbc.driver}")
+       private String driver;
+       @Value("${jdbc.url}")
+       private String url;
+       @Value("${jdbc.username}")
+       private String userName;
+       @Value("${jdbc.password}")
+       private String password;
+   
+       @Bean
+       public DataSource dataSource(){
+           DruidDataSource ds = new DruidDataSource();
+           ds.setDriverClassName(driver);
+           ds.setUrl(url);
+           ds.setUsername(userName);
+           ds.setPassword(password);
+           return ds;
+       }
+   }
+   ```
+
+   `$` 中的内容从 properties 文件中读取，所以需要在Spring配置类中用 `@PropertySource` 注解导入 properties 文件路径
+
+4. 主配置类中读properties并引入数据源配置类
+
+   ```java
+   @Configuration
+   @ComponentScan("com.rainsun")
+   @PropertySource("jdbc.properties")
+   @Import(JdbcConfig.class)
+   public class SpringConfig {
+   }
+   ```
+
+5. 创建 Mybaties 配置类并配置 SqlSessionFactory
+
+   ```java
+   public class MybatisConfig {
+       //定义bean，SqlSessionFactoryBean，用于产生SqlSessionFactory对象
+       @Bean
+       public SqlSessionFactoryBean sqlSessionFactory(DataSource dataSource){
+           SqlSessionFactoryBean ssfb = new SqlSessionFactoryBean();
+           //设置模型类的别名扫描
+           ssfb.setTypeAliasesPackage("com.rainsun.pojo");
+           //设置数据源
+           ssfb.setDataSource(dataSource);
+           return ssfb;
+       }
+       //定义bean，返回MapperScannerConfigurer对象
+       @Bean
+       public MapperScannerConfigurer mapperScannerConfigurer(){
+           MapperScannerConfigurer msc = new MapperScannerConfigurer();
+           msc.setBasePackage("com.rainsun.pojo");
+           return msc;
+       }
+   }
+   ```
+
+   

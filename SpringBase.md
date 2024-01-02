@@ -585,7 +585,7 @@ public class BookServiceImpl implements BookService, InitializingBean, Disposabl
   public class BookDaoImpl implements BookDao{
       private String databaseName;
       private int connectionNum;
-      
+  
       public void setDatabaseName(String databaseName) {
           this.databaseName = databaseName;
       }

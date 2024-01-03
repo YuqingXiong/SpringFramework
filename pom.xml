@@ -15,6 +15,7 @@
       <module>spring_03_annotation</module>
       <module>spring_04_mybatis</module>
       <module>spring_05_junit</module>
+    <module>spring_06_aop</module>
   </modules>
 
   <properties>

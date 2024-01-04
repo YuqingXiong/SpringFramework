@@ -199,3 +199,73 @@ public class SpringConfig {
 
 ## 3.2 AOP 通知类型
 
+1. 前置通知：追加功能到方法执行前
+
+```java
+@Component
+@Aspect
+public class MyAdvice {
+    @Pointcut("execution(void com.rainsun.dao.BookDao.update())")
+    private void pt(){}
+    
+    @Before("pt()")
+    //此处也可以写成 @Before("MyAdvice.pt()"),不建议
+    public void before() {
+        System.out.println("before advice ...");
+    }
+}
+```
+
+2. 后置通知,追加功能到方法执行后
+
+```java
+@After("pt()")
+public void after() {
+    System.out.println("after advice ...");
+}
+```
+
+3. 返回后通知,追加功能到方法执行后，只有方法正常执行结束后才进行；return了才会通知，中间出异常了就不会执行通知
+
+```java
+@AfterReturning("pt2()")
+public void afterReturning() {
+    System.out.println("afterReturning advice ...");
+}
+```
+
+4. 抛出异常后通知,追加功能到方法抛出异常后，只有方法执行出异常才进行,
+
+```java
+@AfterThrowing("pt2()")
+public void afterThrowing() {
+    System.out.println("afterThrowing advice ...");
+}
+```
+
+5. **环绕通知**：环绕通知功能比较强大，它可以追加功能到方法执行的前后
+
+```java
+@Component
+@Aspect
+public class MyAdvice {
+    @Pointcut("execution(void com.rainsun.dao.BookDao.update())")
+    private void pt(){}
+    
+    @Pointcut("execution(int com.rainsun.dao.BookDao.select())")
+    private void pt2(){}
+    
+    @Around("pt2()")
+    public Object aroundSelect(ProceedingJoinPoint pjp) throws Throwable {
+        System.out.println("around before advice ...");
+        //表示对原始操作的调用
+        Object ret = pjp.proceed();
+        System.out.println("around after advice ...");
+        return ret;
+    }
+}
+```
+
+- 因为环绕通知需要在原始方法的前后进行增强，所以环绕通知就必须要能对原始操作进行调用，这里通过传递一个 `ProceedingJoinPoint` 的形参进行，调用 proceed()方法就是对原始方法的调用。
+
+- 原始方法有返回值时，还需要根据原始方法的返回值来设置环绕通知的返回值

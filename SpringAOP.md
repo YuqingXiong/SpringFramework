@@ -269,3 +269,133 @@ public class MyAdvice {
 - 因为环绕通知需要在原始方法的前后进行增强，所以环绕通知就必须要能对原始操作进行调用，这里通过传递一个 `ProceedingJoinPoint` 的形参进行，调用 proceed()方法就是对原始方法的调用。
 
 - 原始方法有返回值时，还需要根据原始方法的返回值来设置环绕通知的返回值
+
+## 3.3 AOP通知获取数据
+
+有时候需要根据切入点的方法信息进行特殊操作。
+
+这时候需要获取该方法的 `参数`，`返回值`，`异常` 这三个方面
+
+获取方式：
+
+1. 获取切入点方法的参数，所有的通知类型都可以获取参数
+
+   * JoinPoint：适用于前置、后置、返回后、抛出异常后通知
+
+   * ProceedingJoinPoint：适用于环绕通知
+
+2. 获取切入点方法返回值，前置和抛出异常后通知是没有返回值，后置通知可有可无，所以不做研究
+
+   * 返回后通知
+
+   * 环绕通知
+
+3. 获取切入点方法运行异常信息，前置和返回后通知是不会有，后置通知可有可无，所以不做研究
+
+   * 抛出异常后通知
+   * 环绕通知
+
+----
+
+1. 获取切入点的方法参数：
+
+**非环绕通知获取方式**：在方法上添加JoinPoint,通过JoinPoint来获取参数
+
+```java
+@Before("pt()")
+public void before(JoinPoint jp){
+    Object[] args = jp.getArgs();
+    System.out.println(Arrays.toString(args));
+    System.out.println("before advice...");
+}
+```
+
+**环绕通知获取方式**：
+
+环绕通知使用的是ProceedingJoinPoint，因为ProceedingJoinPoint是JoinPoint类的子类，所以对于ProceedingJoinPoint类中应该也会有对应的`getArgs()`方法
+
+pjp.proceed()方法是有两个构造方法，分别是:
+
+![1630234756123](https://xiongyuqing-img.oss-cn-qingdao.aliyuncs.com/img/202401042055587.png)
+
+* 调用无参数的proceed，当原始方法有参数，会在调用的过程中自动传入参数
+
+* 所以调用这两个方法的任意一个都可以完成功能
+
+* 但是当需要修改原始方法的参数时，就只能采用带有参数的方法,如下:
+
+```java
+@Around("pt()")
+public Object around(ProceedingJoinPoint pjp) throws Throwable{
+    Object[] args = pjp.getArgs();
+    System.out.println(Arrays.toString(args));
+    args[0] = 666;
+    Object ret = pjp.proceed(args);
+    return ret;
+}
+```
+
+2. 获取返回值
+
+只有返回后`AfterReturing`和环绕`Around`这两个通知类型可以获取
+
+**环绕通知获取返回值**：
+
+`Object ret = pjp.proceed(args);` 中的 ret 就是返回值
+
+**返回后通知获取返回值**：
+
+需要先定义一个获取返回值的形参
+
+```java
+@AfterReturning(value = "pt()",returning = "ret")
+public void afterReturning(Object ret) {
+    System.out.println("afterReturning advice ..."+ret);
+}
+```
+
+(1)参数名的问题
+
+![1630237320870](https://xiongyuqing-img.oss-cn-qingdao.aliyuncs.com/img/202401052116124.png)
+
+(2)afterReturning方法参数类型的问题
+
+参数类型可以写成String，但是为了能匹配更多的参数类型，建议写成Object类型
+
+(3)afterReturning方法参数的顺序问题
+
+![1630237586682](https://xiongyuqing-img.oss-cn-qingdao.aliyuncs.com/img/202401052116162.png)
+
+3. 获取异常
+
+对于获取抛出的异常，只有抛出异常后`AfterThrowing`和环绕`Around`这两个通知类型可以获取
+
+**环绕通知获取异常**：
+
+在catch方法中就可以获取到异常，至于获取到异常以后该如何处理，这个就和业务需求有关了。
+
+```java
+@Around("pt()")
+public Object around(ProceedingJoinPoint pjp){
+    Object[] args = pjp.getArgs();
+    System.out.println(Arrays.toString(args));
+    args[0] = 666;
+    Object ret = null;
+    try{
+        ret = pjp.proceed(args);
+    }catch(Throwable throwable){
+        t.printStackTrace();
+    }
+    return ret;
+}
+```
+
+**抛出异常后通知获取异常:**
+
+```java
+@AfterThrowing(value = "pt()",throwing = "t")
+public void afterThrowing(Throwable t) {
+    System.out.println("afterThrowing advice ..."+t);
+}
+```
+

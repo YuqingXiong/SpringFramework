@@ -14,4 +14,9 @@ public class BookDaoImpl implements BookDao {
     public void update(){
         System.out.println("book dao update ...");
     }
+
+    public String findName(int id) {
+        System.out.println("id:"+id);
+        return "rainsun";
+    }
 }

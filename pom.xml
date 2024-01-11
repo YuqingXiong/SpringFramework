@@ -16,6 +16,8 @@
       <module>spring_04_mybatis</module>
       <module>spring_05_junit</module>
     <module>spring_06_aop</module>
+      <module>spring_07_transfer</module>
+    <module>spring_07_transfer</module>
   </modules>
 
   <properties>

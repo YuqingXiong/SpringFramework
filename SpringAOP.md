@@ -399,3 +399,343 @@ public void afterThrowing(Throwable t) {
 }
 ```
 
+# 4 AOP 事务管理
+
+- 事务作用：在数据层保障一系列的数据库操作同成功同失败
+- Spring事务作用：在数据层或**==业务层==**保障一系列的数据库操作同成功同失败
+
+1. 添加依赖：
+
+```xml
+<dependencies>
+    <dependency>
+        <groupId>org.springframework</groupId>
+        <artifactId>spring-context</artifactId>
+        <version>6.1.2</version>
+    </dependency>
+
+    <dependency>
+        <groupId>com.alibaba</groupId>
+        <artifactId>druid</artifactId>
+        <version>1.2.15</version>
+    </dependency>
+
+    <dependency>
+        <groupId>org.mybatis</groupId>
+        <artifactId>mybatis</artifactId>
+        <version>3.5.9</version>
+    </dependency>
+
+    <dependency>
+        <groupId>com.mysql</groupId>
+        <artifactId>mysql-connector-j</artifactId>
+        <version>8.2.0</version>
+    </dependency>
+
+    <dependency>
+        <groupId>org.springframework</groupId>
+        <artifactId>spring-jdbc</artifactId>
+        <version>6.1.1</version>
+    </dependency>
+
+    <dependency>
+        <groupId>org.mybatis</groupId>
+        <artifactId>mybatis-spring</artifactId>
+        <version>3.0.3</version>
+    </dependency>
+
+    <dependency>
+        <groupId>org.springframework</groupId>
+        <artifactId>spring-test</artifactId>
+        <version>6.1.2</version>
+    </dependency>
+
+    <dependency>
+        <groupId>junit</groupId>
+        <artifactId>junit</artifactId>
+        <version>3.8.1</version>
+        <scope>test</scope>
+    </dependency>
+</dependencies>
+```
+
+2. 创建原型类 Account
+
+```java
+public class Account implements Serializable {
+
+    private Integer id;
+    private String name;
+    private Double money;
+	//setter...getter...toString...方法略    
+}
+```
+
+3. 创建 Dao 接口
+
+```java
+public interface AccountDao {
+
+    @Update("update tbl_account set money = money + #{money} where name = #{name}")
+    void inMoney(@Param("name") String name, @Param("money") Double money);
+
+    @Update("update tbl_account set money = money - #{money} where name = #{name}")
+    void outMoney(@Param("name") String name, @Param("money") Double money);
+}
+```
+
+4. Service接口&实现类
+
+```java
+public interface AccountService {
+    /**
+     * 转账操作
+     * @param out 传出方
+     * @param in 转入方
+     * @param money 金额
+     */
+    public void transfer(String out,String in ,Double money) ;
+}
+
+@Service
+public class AccountServiceImpl implements AccountService {
+
+    @Autowired
+    private AccountDao accountDao;
+
+    public void transfer(String out,String in ,Double money) {
+        accountDao.outMoney(out,money);
+        accountDao.inMoney(in,money);
+    }
+
+}
+```
+
+5. 配置JDBC形成一个数据库连接池用于获取数据库连接对象
+
+添加jdbc.properties文件
+
+```java
+jdbc.driver=com.mysql.jdbc.Driver
+jdbc.url=jdbc:mysql://localhost:3306/spring_db?useSSL=false
+jdbc.username=root
+jdbc.password=root
+```
+
+创建JdbcConfig配置类
+
+```java
+public class JdbcConfig {
+    @Value("${jdbc.driver}")
+    private String driver;
+    @Value("${jdbc.url}")
+    private String url;
+    @Value("${jdbc.username}")
+    private String userName;
+    @Value("${jdbc.password}")
+    private String password;
+
+    @Bean
+    public DataSource dataSource(){
+        DruidDataSource ds = new DruidDataSource();
+        ds.setDriverClassName(driver);
+        ds.setUrl(url);
+        ds.setUsername(userName);
+        ds.setPassword(password);
+        return ds;
+    }
+}
+```
+
+6. 创建MybatisConfig配置类，用于创建操纵 SQL 语句的对象，并定义扫描的范围
+
+```java
+public class MybatisConfig {
+    @Bean
+    public SqlSessionFactoryBean sqlSessionFactory(DataSource dataSource){
+        SqlSessionFactoryBean ssfb = new SqlSessionFactoryBean();
+        ssfb.setTypeAliasesPackage("com.rainsun.domain");
+        ssfb.setDataSource(dataSource);
+        return ssfb;
+    }
+
+    @Bean
+    public MapperScannerConfigurer mapperScannerConfigurer(){
+        MapperScannerConfigurer msc = new MapperScannerConfigurer();
+        msc.setBasePackage("com.rainsun.dao");
+        return msc;
+    }
+}
+```
+
+7. 创建SpringConfig配置类，定义IoC容器扫描获得Bean的范围，引入其他的配置
+
+```java
+@Configuration
+@ComponentScan("com.rainsun")
+@PropertySource("classpath:jdbc.properties")
+@Import({JdbcConfig.class, MybatisConfig.class})
+public class SpringConfig {
+}
+```
+
+8. 测试类，表示执行上下文用的配置来自SpringConfig类，以及用测试的方式执行
+
+```java
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration(classes = SpringConfig.class)
+public class AccountServiceTest {
+    @Autowired
+    private AccountService accountService;
+
+    @Test
+    public void testTransfer() throws IOException {
+        accountService.transfer("Tom","Jerry",100D);
+    }
+}
+```
+
+![image-20240111163610301](https://xiongyuqing-img.oss-cn-qingdao.aliyuncs.com/img/202401111636385.png)
+
+## 4.1 事务管理
+
+1. 在需要事务管理的方法上添加注解
+
+```java
+public interface AccountService {
+    @Transactional
+    public void transfer(String out, String in, Double money);
+}
+```
+
+==注意:==
+
+@Transactional可以写在接口类上、接口方法上、实现类上和实现类方法上
+
+* 写在接口类上，该接口的所有实现类的所有方法都会有事务
+* 写在接口方法上，该接口的所有实现类的该方法都会有事务
+* 写在实现类上，该类中的所有方法都会有事务
+* 写在实现类方法上，该方法上有事务
+* 建议写在实现类或实现类的方法上
+
+2. 在Jdbc中配置事务管理器,mybatis使用的是jdbc事务
+
+```java
+@Bean
+public PlatformTransactionManager transactionManager(DataSource dataSource){
+    DataSourceTransactionManager transactionManager = new DataSourceTransactionManager();
+    transactionManager.setDataSource(dataSource);
+    return transactionManager;
+}
+```
+
+3. 在SpringConfig的配置类中开启事务注解
+
+```java
+@Configuration
+@ComponentScan("com.rainsun")
+@PropertySource("classpath:jdbc.properties")
+@Import({JdbcConfig.class, MybatisConfig.class})
+@EnableTransactionManagement
+public class SpringConfig {
+}
+```
+
+## 4.2 事务角色
+
+1. 未开启事务前：有两个事务 T1,T2
+   - AccountDao的outMoney因为是修改操作，会开启一个事务T1
+   - AccountDao的inMoney因为是修改操作，会开启一个事务T2
+   - AccountService的transfer没有事务，
+     * 运行过程中如果没有抛出异常，则T1和T2都正常提交，数据正确
+     * 如果在两个方法中间抛出异常，T1因为执行成功提交事务，T2因为抛异常不会被执行
+     * 就会导致数据出现错误
+2. 开启Spring的事务管理后：只有一个事务 T
+   - transfer上添加了@Transactional注解，在该方法上就会有一个事务T
+   - AccountDao的outMoney方法的事务T1加入到transfer的事务T中
+   - AccountDao的inMoney方法的事务T2加入到transfer的事务T中
+   - 这样就保证他们在同一个事务中，当业务层中出现异常，整个事务就会回滚，保证数据的准确性。
+
+![image-20240111164316649](https://xiongyuqing-img.oss-cn-qingdao.aliyuncs.com/img/202401111643744.png)
+
+- 事务管理员：发起事务方，在Spring中通常指代业务层开启事务的方法
+- 事务协调员：加入事务方，在Spring中通常指代数据层方法，也可以是业务层方法
+
+## 4.3 事务属性
+
+### 事务配置
+
+![image-20240111164629953](https://xiongyuqing-img.oss-cn-qingdao.aliyuncs.com/img/202401111646007.png)
+
+并不是所有的异常都会回滚事务，比如下面的代码就不会回滚：
+
+```java
+public interface AccountService {
+    /**
+     * 转账操作
+     * @param out 传出方
+     * @param in 转入方
+     * @param money 金额
+     */
+    //配置当前接口方法具有事务
+    public void transfer(String out,String in ,Double money) throws IOException;
+}
+
+@Service
+public class AccountServiceImpl implements AccountService {
+
+    @Autowired
+    private AccountDao accountDao;
+	@Transactional
+    public void transfer(String out,String in ,Double money) throws IOException{
+        accountDao.outMoney(out,money);
+        //int i = 1/0; //这个异常事务会回滚
+        if(true){
+            throw new IOException(); //这个异常事务就不会回滚
+        }
+        accountDao.inMoney(in,money);
+    }
+
+}
+```
+
+出现这个问题的原因是，Spring的事务只会对`Error异常`和`RuntimeException异常`及其子类进行事务回顾，其他的异常类型是不会回滚的，对应IOException不符合上述条件所以不回滚
+
+- 此时就可以使用rollbackFor属性来设置出现IOException异常不回滚
+
+````java
+@Service
+public class AccountServiceImpl implements AccountService {
+
+    @Autowired
+    private AccountDao accountDao;
+	 @Transactional(rollbackFor = {IOException.class})
+    public void transfer(String out,String in ,Double money) throws IOException{
+        accountDao.outMoney(out,money);
+        //int i = 1/0; //这个异常事务会回滚
+        if(true){
+            throw new IOException(); //这个异常事务就不会回滚
+        }
+        accountDao.inMoney(in,money);
+    }
+
+}
+````
+
+isolation设置事务的隔离级别
+
+* DEFAULT   :默认隔离级别, 会采用数据库的隔离级别
+* READ_UNCOMMITTED : 读未提交
+* READ_COMMITTED : 读已提交
+* REPEATABLE_READ : 重复读取
+* SERIALIZABLE: 串行化
+
+`propagation属性`：
+
+当一个事务里包含多个事务时，设置新事务是否加入到当前事务
+
+![image-20240111165639622](https://xiongyuqing-img.oss-cn-qingdao.aliyuncs.com/img/202401111656684.png)
+
+事务传播行为：事务协调员对事务管理员所携带事务的处理态度。
+
+![image-20240111165830370](https://xiongyuqing-img.oss-cn-qingdao.aliyuncs.com/img/202401111658425.png)

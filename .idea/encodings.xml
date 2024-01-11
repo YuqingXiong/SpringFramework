@@ -11,8 +11,10 @@
     <file url="file://$PROJECT_DIR$/spring_04_mybatis/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/spring_05_junit/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/spring_05_junit/src/main/resources" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/spring_06_AOP/src/main/java" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/spring_06_AOP/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/spring_06_aop/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/spring_06_aop/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/spring_07_transfer/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/spring_07_transfer/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/src/main/resources" charset="UTF-8" />
   </component>

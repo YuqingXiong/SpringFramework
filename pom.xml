@@ -20,6 +20,7 @@
     <module>spring_07_transfer</module>
       <module>springmvc_01_base</module>
       <module>springmvc_02_request_respond</module>
+      <module>springmvc_03_REST</module>
   </modules>
 
   <properties>

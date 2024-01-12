@@ -6,7 +6,7 @@
 
 ## Spring MVC
 1. Spring MVC Base:https://github.com/YuqingXiong/SpringFramework/blob/master/SpringMVCBase.md
-2. Spring MVC 请求响应参数
+2. Spring MVC request and response:https://github.com/YuqingXiong/SpringFramework/blob/master/SpringMVCRequestResponse.md
 3. Spring MVC REST 风格
 ## Spring Boot
 

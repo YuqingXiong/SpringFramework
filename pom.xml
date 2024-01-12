@@ -19,6 +19,7 @@
       <module>spring_07_transfer</module>
     <module>spring_07_transfer</module>
       <module>springmvc_01_base</module>
+      <module>springmvc_02_request_respond</module>
   </modules>
 
   <properties>

@@ -18,6 +18,7 @@
     <module>spring_06_aop</module>
       <module>spring_07_transfer</module>
     <module>spring_07_transfer</module>
+      <module>springmvc_01_base</module>
   </modules>
 
   <properties>

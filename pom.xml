@@ -21,6 +21,7 @@
       <module>springmvc_01_base</module>
       <module>springmvc_02_request_respond</module>
       <module>springmvc_03_REST</module>
+      <module>springmvc_04_ssm</module>
   </modules>
 
   <properties>

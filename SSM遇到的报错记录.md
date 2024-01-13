@@ -99,7 +99,9 @@
 </project>
 ```
 
-# tomcat 报错：A child container failed during start
+# （显式）tomcat 报错：A child container failed during start、
+
+这只是表面错误，更深的错误应该进入第一级的报错信息看
 
 ![image-20240113204807370](https://xiongyuqing-img.oss-cn-qingdao.aliyuncs.com/img/202401132048430.png)
 
@@ -160,4 +162,36 @@ public class SpringConfig {
 > pom.xml里 servlet-api 没写  `<scope>provided</scope>`[Tomcat启动报A child container failed during start问题解决-CSDN博客](https://blog.csdn.net/qq_26599807/article/details/107694063)
 >
 > [A child container failed during start-阿里云开发者社区 (aliyun.com)](https://developer.aliyun.com/article/342754)
+
+#  ASM ClassReader failed to parse class file
+
+> [ERROR] Context initialization failed 
+>
+> org.springframework.beans.factory.BeanDefinitionStoreException: Failed to process import candidates for configuration class [com.rainsun.config.SpringConfig]; nested exception is org.springframework.core.NestedIOException: ASM ClassReader failed to parse class file - probably due to a new Java class file version that isn't supported yet: class path resource [org/springframework/transaction/annotation/ProxyTransactionManagementConfiguration.class]; nested exception is java.lang.IllegalArgumentException: Unsupported class file major version 61
+>
+> ![image-20240113220557014](https://xiongyuqing-img.oss-cn-qingdao.aliyuncs.com/img/202401132205164.png)
+
+## Spring 版本不支持 JDK21
+
+[异常处理：ASM ClassReader failed to parse class file的分析与解决_asm classreader failed to parse class file - proba-CSDN博客](https://blog.csdn.net/chenchunlin526/article/details/78798996)
+
+解决灵感来源：[jdk21升级，asm报错Unsupported class file major version 65-CSDN博客](https://blog.csdn.net/qq_27577113/article/details/134895868)
+
+版本对应关系：[Spring Framework Versions · spring-projects/spring-framework Wiki · GitHub](https://github.com/spring-projects/spring-framework/wiki/Spring-Framework-Versions)
+
+![image-20240113220529498](https://xiongyuqing-img.oss-cn-qingdao.aliyuncs.com/img/202401132207853.png)
+
+### 解决方案
+
+提高Spring版本：
+
+```xml
+<dependency>
+    <groupId>org.springframework</groupId>
+    <artifactId>spring-webmvc</artifactId>
+    <version>5.3.29</version>
+</dependency>
+```
+
+
 

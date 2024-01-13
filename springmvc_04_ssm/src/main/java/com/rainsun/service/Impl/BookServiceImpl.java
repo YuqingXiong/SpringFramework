@@ -5,6 +5,7 @@ import com.rainsun.domain.Book;
 import com.rainsun.service.BookService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 

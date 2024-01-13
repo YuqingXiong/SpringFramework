@@ -99,7 +99,7 @@
 </project>
 ```
 
-# （显式）tomcat 报错：A child container failed during start、
+# （显式）tomcat 报错：A child container failed during start
 
 这只是表面错误，更深的错误应该进入第一级的报错信息看
 
@@ -176,6 +176,8 @@ public class SpringConfig {
 [异常处理：ASM ClassReader failed to parse class file的分析与解决_asm classreader failed to parse class file - proba-CSDN博客](https://blog.csdn.net/chenchunlin526/article/details/78798996)
 
 解决灵感来源：[jdk21升级，asm报错Unsupported class file major version 65-CSDN博客](https://blog.csdn.net/qq_27577113/article/details/134895868)
+
+[Spring Framework与JDK版本对应关系_org.springframework.core-3.0.5 jdk-CSDN博客](https://blog.csdn.net/a321123b/article/details/123568578)
 
 版本对应关系：[Spring Framework Versions · spring-projects/spring-framework Wiki · GitHub](https://github.com/spring-projects/spring-framework/wiki/Spring-Framework-Versions)
 

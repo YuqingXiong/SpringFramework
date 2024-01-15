@@ -23,6 +23,7 @@
       <module>springmvc_03_REST</module>
       <module>springmvc_04_ssm</module>
       <module>springmvc_05_interceptor</module>
+      <module>maven_01_ssm</module>
   </modules>
 
   <properties>

@@ -22,6 +22,7 @@
       <module>springmvc_02_request_respond</module>
       <module>springmvc_03_REST</module>
       <module>springmvc_04_ssm</module>
+      <module>springmvc_05_interceptor</module>
   </modules>
 
   <properties>

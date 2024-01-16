@@ -8,7 +8,7 @@
         <relativePath>../maven_00_parent/pom.xml</relativePath>
     </parent>
     <artifactId>maven_01_ssm</artifactId>
-    <packaging>war</packaging>
+    <packaging>jar</packaging>
     <name>maven_01_ssm Maven Webapp</name>
     <url>http://maven.apache.org</url>
     <dependencies>

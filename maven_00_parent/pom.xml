@@ -15,6 +15,7 @@
     <spring.version>5.3.29</spring.version>
     <junit.version>4.13.2</junit.version>
     <mybatis-spring.version>2.0.7</mybatis-spring.version>
+    <jdbc.url>jdbc:mysql://localhost:3306/ssm_db</jdbc.url>
   </properties>
 
   <modules>
@@ -94,4 +95,41 @@
       </dependency>
     </dependencies>
   </dependencyManagement>
+
+  <build>
+    <resources>
+      <resource>
+        <directory>${project.basedir}/maven_01_ssm/src/main/resources</directory>
+        <filtering>true</filtering>
+      </resource>
+    </resources>
+  </build>
+
+  <profiles>
+    <!--开发环境-->
+    <profile>
+      <id>env_dep</id>
+      <properties>
+        <jdbc.url>jdbc:mysql://127.0.0.1:3306/ssm_db</jdbc.url>
+      </properties>
+      <!--设定是否为默认启动环境-->
+      <activation>
+        <activeByDefault>true</activeByDefault>
+      </activation>
+    </profile>
+    <!--生产环境-->
+    <profile>
+      <id>env_pro</id>
+      <properties>
+        <jdbc.url>jdbc:mysql://127.2.2.2:3306/ssm_db</jdbc.url>
+      </properties>
+    </profile>
+    <!--测试环境-->
+    <profile>
+      <id>env_test</id>
+      <properties>
+        <jdbc.url>jdbc:mysql://127.3.3.3:3306/ssm_db</jdbc.url>
+      </properties>
+    </profile>
+  </profiles>
 </project>

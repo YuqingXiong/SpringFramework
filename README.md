@@ -10,7 +10,10 @@
 2. Request and Response:[SpringMvcRequestResponse](https://github.com/YuqingXiong/SpringFramework/blob/master/SpringMVCRequestResponse.md)
 3. REST 风格:[SpringMvcREST](https://github.com/YuqingXiong/SpringFramework/blob/master/SpringMVCREST.md/)
 4. 统一结果&统一异常封装:springmvc_04_ssm
-4. 拦截器:[SpringMvcInterceptor](https://github.com/YuqingXiong/SpringFramework/blob/master/SpringMvcInterceptor.md/)
+5. 拦截器:[SpringMvcInterceptor](https://github.com/YuqingXiong/SpringFramework/blob/master/SpringMvcInterceptor.md/)
+
+# Maven
+分模块开发,依赖管理,聚合和继承,属性,多环境配置与应用,私服:[Maven](https://github.com/YuqingXiong/SpringFramework/blob/master/Maven.md/)
 ## Spring Boot
 
 ## MyBatisPlus

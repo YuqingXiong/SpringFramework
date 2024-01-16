@@ -12,6 +12,9 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <spring.version>5.3.29</spring.version>
+    <junit.version>4.13.2</junit.version>
+    <mybatis-spring.version>2.0.7</mybatis-spring.version>
   </properties>
 
   <modules>
@@ -31,7 +34,23 @@
     <dependency>
       <groupId>org.springframework</groupId>
       <artifactId>spring-webmvc</artifactId>
-      <version>5.3.29</version>
+      <version>${spring.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-jdbc</artifactId>
+      <version>${spring.version}</version>
+    </dependency>
+
+    <!--        spring-test 和 springmvc的版本要相同 -->
+    <!--        驳回上面这句，不相同好像也行-->
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-test</artifactId>
+      <version>${spring.version}</version>
+<!--      <version>6.1.2</version>-->
+      <!--            <version>5.3.0</version>-->
     </dependency>
 
     <dependency>
@@ -50,7 +69,7 @@
     <dependency>
       <groupId>org.mybatis</groupId>
       <artifactId>mybatis-spring</artifactId>
-      <version>2.0.7</version>
+      <version>${mybatis-spring.version}</version>
     </dependency>
 
     <dependency>
@@ -58,26 +77,10 @@
       <artifactId>mysql-connector-j</artifactId>
       <version>8.2.0</version>
     </dependency>
-
-    <dependency>
-      <groupId>org.springframework</groupId>
-      <artifactId>spring-jdbc</artifactId>
-      <version>6.1.1</version>
-    </dependency>
-
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-databind</artifactId>
       <version>2.15.3</version>
-    </dependency>
-
-    <!--        spring-test 和 springmvc的版本要相同 -->
-    <!--        驳回上面这句，不相同好像也行-->
-    <dependency>
-      <groupId>org.springframework</groupId>
-      <artifactId>spring-test</artifactId>
-      <version>6.1.2</version>
-      <!--            <version>5.3.0</version>-->
     </dependency>
   </dependencies>
 
@@ -86,7 +89,7 @@
       <dependency>
         <groupId>junit</groupId>
         <artifactId>junit</artifactId>
-        <version>4.13.2</version>
+        <version>${junit.version}</version>
         <scope>test</scope>
       </dependency>
     </dependencies>

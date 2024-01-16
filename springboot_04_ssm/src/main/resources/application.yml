@@ -1,0 +1,9 @@
+spring:
+  datasource:
+    password: "1234"
+    username: root
+    url: jdbc:mysql://localhost:3306/ssm_db
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    type: com.alibaba.druid.pool.DruidDataSource
+server:
+  port: 80

@@ -4,7 +4,14 @@
     <groupId>com.rainsun</groupId>
     <artifactId>maven_02_pojo</artifactId>
     <version>1.0-SNAPSHOT</version>
-    <packaging>pom</packaging>
+    <packaging>jar</packaging>
+
+    <parent>
+        <groupId>com.rainsun</groupId>
+        <artifactId>maven_00_parent</artifactId>
+        <version>1.0-SNAPSHOT</version>
+        <relativePath>../maven_00_parent/pom.xml</relativePath>
+    </parent>
 
     <name>maven_02_pojo</name>
     <url>http://maven.apache.org</url>
@@ -17,8 +24,8 @@
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>3.8.1</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
+
 </project>
